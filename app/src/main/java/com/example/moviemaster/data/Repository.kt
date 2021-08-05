@@ -7,8 +7,8 @@ import io.reactivex.Observable
 
 class Repository(private val movieService: MovieService){
 
-    fun getMovies(page: Int): Observable<MovieResponse>{
-        return movieService.getMovies(page)
+    fun getMovies(page: Int, genre: String): Observable<MovieResponse>{
+        return movieService.getMovies(page, genre)
     }
 
     fun getGenres(): Observable<GenreResponse>{
