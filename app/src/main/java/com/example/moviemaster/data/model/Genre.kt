@@ -1,3 +1,10 @@
 package com.example.moviemaster.data.model
 
-data class Genre()
+import com.google.gson.annotations.SerializedName
+
+data class Genre(
+
+    val id: Int,
+    @SerializedName("name")
+    val genre: String,
+    )
