@@ -1,6 +1,7 @@
 package com.example.moviemaster.util
 
 import androidx.activity.ComponentActivity
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.moviemaster.data.Repository
@@ -16,9 +17,14 @@ class Injector {
     private val movieService = ApiClient.buildMoviesService()
     private val repository = Repository(movieService)
 
-    fun getMovieListViewModel(fragment: FragmentActivity): MovieListViewModel{
+    fun getMovieListViewModel(fragment: Fragment): MovieListViewModel{
         val movieListViewModelFactory = MovieListViewModelFactory(repository)
         return ViewModelProvider(fragment, movieListViewModelFactory).get(MovieListViewModel::class.java)
+    }
+
+    fun getMovieListViewModel(activity: ComponentActivity): MovieListViewModel{
+        val movieListViewModelFactory = MovieListViewModelFactory(repository)
+        return ViewModelProvider(activity, movieListViewModelFactory).get(MovieListViewModel::class.java)
     }
 
     fun getMovieDetailsViewModel(activity: ComponentActivity, movie: Movie): MovieDetailsViewModel{
