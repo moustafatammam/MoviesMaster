@@ -7,10 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.moviemaster.data.Repository
 import com.example.moviemaster.data.model.Movie
 import com.example.moviemaster.data.remote.ApiClient
-import com.example.moviemaster.viewmodel.MovieDetailsViewModel
-import com.example.moviemaster.viewmodel.MovieDetailsViewModelFactory
-import com.example.moviemaster.viewmodel.MovieListViewModel
-import com.example.moviemaster.viewmodel.MovieListViewModelFactory
+import com.example.moviemaster.viewmodel.*
 
 class Injector {
 
@@ -25,6 +22,11 @@ class Injector {
     fun getMovieListViewModel(activity: ComponentActivity): MovieListViewModel{
         val movieListViewModelFactory = MovieListViewModelFactory(repository)
         return ViewModelProvider(activity, movieListViewModelFactory).get(MovieListViewModel::class.java)
+    }
+
+    fun getMainViewModel(activity: ComponentActivity): MainViewModel{
+        val mainViewModelFactory = MainViewModelFactory(repository)
+        return ViewModelProvider(activity, mainViewModelFactory).get(MainViewModel::class.java)
     }
 
     fun getMovieDetailsViewModel(activity: ComponentActivity, movie: Movie): MovieDetailsViewModel{
