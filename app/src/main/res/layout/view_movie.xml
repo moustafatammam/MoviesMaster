@@ -12,6 +12,7 @@
     </data>
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/movie_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:cardUseCompatPadding="true"
@@ -26,7 +27,7 @@
             >
 
             <ImageView
-                imageUrl="@{movie.posterPath}"
+                posterUrl="@{movie.posterPath}"
                 android:layout_width="250dp"
                 android:layout_height="250dp"
                 android:layout_marginTop="16dp"

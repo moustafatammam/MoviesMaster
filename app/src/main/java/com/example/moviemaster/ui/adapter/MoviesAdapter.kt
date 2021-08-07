@@ -5,8 +5,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.moviemaster.data.model.Movie
 import com.example.moviemaster.databinding.ViewMovieBinding
+import com.example.moviemaster.util.ItemClickListener
 
-class MoviesAdapter: RecyclerView.Adapter<MoviesAdapter.MoviesViewHolder>() {
+class MoviesAdapter(val itemClickListener: ItemClickListener): RecyclerView.Adapter<MoviesAdapter.MoviesViewHolder>() {
 
     var movieList = ArrayList<Movie>()
 
@@ -17,14 +18,17 @@ class MoviesAdapter: RecyclerView.Adapter<MoviesAdapter.MoviesViewHolder>() {
         return MoviesViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: MoviesViewHolder, position: Int) = holder.bind(movieList[position])
+    override fun onBindViewHolder(holder: MoviesViewHolder, position: Int) = holder.bind(movieList[position], itemClickListener)
 
     override fun getItemCount(): Int = movieList.size
 
-    class MoviesViewHolder(val binding: ViewMovieBinding): RecyclerView.ViewHolder(binding.root){
+    class MoviesViewHolder(private val binding: ViewMovieBinding): RecyclerView.ViewHolder(binding.root){
 
-        fun bind(item: Movie){
+        fun bind(item: Movie, itemClickListener: ItemClickListener){
             binding.movie = item
+            binding.movieContainer.setOnClickListener {
+                itemClickListener.onItemClicked(item)
+            }
         }
 
     }

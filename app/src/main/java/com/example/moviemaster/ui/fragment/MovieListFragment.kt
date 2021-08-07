@@ -10,15 +10,18 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.moviemaster.R
+import com.example.moviemaster.data.model.Movie
 import com.example.moviemaster.data.model.MovieResponse
 import com.example.moviemaster.databinding.FragmentMovieListBinding
+import com.example.moviemaster.ui.activity.MovieDetailsActivity
 import com.example.moviemaster.ui.adapter.MoviesAdapter
 import com.example.moviemaster.util.Injector
+import com.example.moviemaster.util.ItemClickListener
 import com.example.moviemaster.util.PaginationScrollListener
 import com.example.moviemaster.viewmodel.MainViewModel
 import com.example.moviemaster.viewmodel.MovieListViewModel
 
-class MovieListFragment() : Fragment() {
+class MovieListFragment() : Fragment(), ItemClickListener {
 
     private lateinit var viewModel: MovieListViewModel
     private lateinit var mainViewModel: MainViewModel
@@ -85,6 +88,7 @@ class MovieListFragment() : Fragment() {
     }
 
     private fun initRecyclerView() {
+        moviesAdapter = MoviesAdapter(this)
         binding.recycler.apply {
             layoutManager = GridLayoutManager(this@MovieListFragment.context, 2)
             addOnScrollListener(object :
@@ -101,7 +105,6 @@ class MovieListFragment() : Fragment() {
                     post(Runnable { adapter?.notifyDataSetChanged() })
                 }
             })
-            moviesAdapter = MoviesAdapter()
             adapter = moviesAdapter
         }
     }
@@ -134,5 +137,9 @@ class MovieListFragment() : Fragment() {
         }
         viewModel.isLoading = false
 
+    }
+
+    override fun onItemClicked(movie: Movie) {
+        startActivity(MovieDetailsActivity.newInstance(this.context, movie))
     }
 }

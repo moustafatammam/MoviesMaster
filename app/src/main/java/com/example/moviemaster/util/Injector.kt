@@ -2,7 +2,6 @@ package com.example.moviemaster.util
 
 import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.moviemaster.data.Repository
 import com.example.moviemaster.data.model.Movie
@@ -29,8 +28,8 @@ class Injector {
         return ViewModelProvider(activity, mainViewModelFactory).get(MainViewModel::class.java)
     }
 
-    fun getMovieDetailsViewModel(activity: ComponentActivity, movie: Movie): MovieDetailsViewModel{
-        val movieDetailsViewModelFactory = MovieDetailsViewModelFactory(movie)
+    fun getMovieDetailsViewModel(activity: ComponentActivity, movie: Movie?): MovieDetailsViewModel{
+        val movieDetailsViewModelFactory = MovieDetailsViewModelFactory(movie,repository)
         return ViewModelProvider(activity, movieDetailsViewModelFactory).get(MovieDetailsViewModel::class.java)
     }
 
