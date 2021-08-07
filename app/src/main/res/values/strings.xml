@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">MovieMaster</string>
+    <string name="movie_overview">Overview</string>
+    <string name="cast_label">Cast</string>
+    <string name="reviews_label">Reviews</string>
 </resources>

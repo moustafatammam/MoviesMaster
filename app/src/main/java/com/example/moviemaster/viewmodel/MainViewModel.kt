@@ -13,9 +13,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
-class MainViewModel(private val repository: Repository) : ViewModel(), Observable {
-
-    private val callbacks: PropertyChangeRegistry = PropertyChangeRegistry()
+class MainViewModel(private val repository: Repository) : BaseViewModel() {
 
     private var genresLiveData: MutableLiveData<GenreResponse> = MutableLiveData()
 
@@ -37,20 +35,5 @@ class MainViewModel(private val repository: Repository) : ViewModel(), Observabl
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { v -> genresLiveData.postValue(v) }
-    }
-
-
-    override fun addOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {
-        callbacks.add(callback)
-
-    }
-
-    override fun removeOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {
-        callbacks.remove(callback)
-
-    }
-
-    fun notifyPropertyChanged(fieldId: Int) {
-        callbacks.notifyCallbacks(this, fieldId, null)
     }
 }
