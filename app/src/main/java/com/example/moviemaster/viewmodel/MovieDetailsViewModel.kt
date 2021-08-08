@@ -1,12 +1,12 @@
 package com.example.moviemaster.viewmodel
 
+import android.util.Log
 import androidx.databinding.Bindable
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import com.example.moviemaster.data.Repository
 import com.example.moviemaster.data.model.*
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
 class MovieDetailsViewModel(val movie: Movie?, private val repository: Repository) :
@@ -52,25 +52,28 @@ class MovieDetailsViewModel(val movie: Movie?, private val repository: Repositor
         return reviewLiveData
     }
 
-    fun getImages(): Disposable? {
-        return repository.getMovieImages(movie?.id)
+    fun getImages() {
+        val disposable =  repository.getMovieImages(movie?.id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { v -> imagesLiveData.postValue(v) }
+            .subscribe ({ v -> imagesLiveData.postValue(v)}, {e -> Log.e("MovieDetailsActivity", e.localizedMessage)})
+        addDisposable(disposable)
     }
 
-    fun getCast(): Disposable? {
-        return repository.getMovieCast(movie?.id)
+    fun getCast() {
+        val disposable = repository.getMovieCast(movie?.id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { v -> castLiveData.postValue(v) }
+            .subscribe ({ v -> castLiveData.postValue(v)}, {e -> Log.e("MovieDetailsActivity", e.localizedMessage)})
+        addDisposable(disposable)
     }
 
-    fun getReviews(): Disposable? {
-        return repository.getMovieReview(movie?.id)
+    fun getReviews() {
+        val disposable = repository.getMovieReview(movie?.id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { v -> reviewLiveData.postValue(v) }
+            .subscribe ({ v -> reviewLiveData.postValue(v)}, {e -> Log.e("MovieDetailsActivity", e.localizedMessage)})
+        addDisposable(disposable)
     }
 
 

@@ -1,14 +1,13 @@
 package com.example.moviemaster.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.example.moviemaster.data.Repository
 import com.example.moviemaster.data.model.MovieResponse
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
-class MovieListViewModel(private val repository: Repository) : ViewModel(){
+class MovieListViewModel(private val repository: Repository) : BaseViewModel(){
 
     var searchedQuery: String? = null
     var genre: Int = 0
@@ -26,17 +25,21 @@ class MovieListViewModel(private val repository: Repository) : ViewModel(){
         return searchedMoviesLiveData
     }
 
-    fun getMovies(page: Int, genre: String): Disposable? {
-        return repository.getMovies(page, genre)
+    fun getMovies(page: Int, genre: String) {
+        val disposable =  repository.getMovies(page, genre)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { v -> moviesLiveData.postValue(v) }
+            .subscribe ({ v -> moviesLiveData.postValue(v)}, {e -> Log.e("MovieListFragment", e.localizedMessage)})
+        addDisposable(disposable)
+
     }
 
-    fun getSearchedMovies(searchQuery: String, page: Int): Disposable? {
-        return repository.getSearchedMovies(searchQuery, page)
+    fun getSearchedMovies(searchQuery: String, page: Int) {
+        val disposable =  repository.getSearchedMovies(searchQuery, page)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { v -> searchedMoviesLiveData.postValue(v) }
+            .subscribe ({ v -> searchedMoviesLiveData.postValue(v)}, {e -> Log.e("MovieListFragment", e.localizedMessage)})
+        addDisposable(disposable)
+
     }
 }

@@ -1,11 +1,9 @@
 package com.example.moviemaster.viewmodel
 
+import android.util.Log
 import androidx.databinding.Bindable
-import androidx.databinding.Observable
-import androidx.databinding.PropertyChangeRegistry
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.example.moviemaster.data.Repository
 import com.example.moviemaster.data.model.Genre
 import com.example.moviemaster.data.model.GenreResponse
@@ -30,10 +28,12 @@ class MainViewModel(private val repository: Repository) : BaseViewModel() {
         return genresLiveData
     }
 
-    fun getGenres(): Disposable? {
-        return repository.getGenres()
+    fun getGenres() {
+        val disposable =  repository.getGenres()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { v -> genresLiveData.postValue(v) }
+            .subscribe ({ v -> genresLiveData.postValue(v) }, {e -> Log.e("MainActivity", e.localizedMessage)})
+
+        addDisposable(disposable)
     }
 }
