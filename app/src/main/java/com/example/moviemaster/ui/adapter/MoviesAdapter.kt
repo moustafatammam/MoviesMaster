@@ -7,7 +7,7 @@ import com.example.moviemaster.data.model.Movie
 import com.example.moviemaster.databinding.ViewMovieBinding
 import com.example.moviemaster.util.ItemClickListener
 
-class MoviesAdapter(val itemClickListener: ItemClickListener): RecyclerView.Adapter<MoviesAdapter.MoviesViewHolder>() {
+class MoviesAdapter(private val itemClickListener: ItemClickListener): RecyclerView.Adapter<MoviesAdapter.MoviesViewHolder>() {
 
     var movieList = ArrayList<Movie>()
 

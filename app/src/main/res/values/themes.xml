@@ -14,4 +14,15 @@
         <!-- Customize your theme here. -->
         <item name="android:forceDarkAllowed">false</item>
     </style>
+
+    <style name="Shimmer">
+        <item name="shimmer_auto_start">true</item>
+        <item name="shimmer_direction">left_to_right</item>
+        <item name="shimmer_tilt">25</item>
+        <item name="shimmer_dropoff">0.2</item>
+        <item name="shimmer_highlight_color">#ffffff</item>
+        <item name="shimmer_repeat_delay">0</item>
+        <item name="shimmer_intensity">0.1</item>
+        <item name="shimmer_duration">1200</item>
+    </style>
 </resources>
