@@ -1,6 +1,8 @@
 package com.example.moviemaster.ui.fragment
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -64,7 +66,7 @@ class MovieListFragment() : Fragment(), ItemClickListener {
         super.onViewCreated(view, savedInstanceState)
         mainViewModel = Injector().getMainViewModel(requireActivity())
         viewModel = Injector().getMovieListViewModel(this)
-
+        binding.viewmodel = viewModel
 
         arguments?.let {
             viewModel.genre = it.getInt("genre")
@@ -121,7 +123,7 @@ class MovieListFragment() : Fragment(), ItemClickListener {
             viewModel.getSearchedMovies(viewModel.searchedQuery!!, page)
         } else {
             viewModel.getMovieLiveData().observe(this.viewLifecycleOwner, Observer {
-               updateAdapter(it, page)
+                updateAdapter(it, page)
             })
             viewModel.getMovies(page, if (viewModel.genre == 0) "" else viewModel.genre.toString())
         }
@@ -145,7 +147,7 @@ class MovieListFragment() : Fragment(), ItemClickListener {
         startActivity(MovieDetailsActivity.newInstance(this.context, movie))
     }
 
-    private fun setOnSwipeRefreshLayout(){
+    private fun setOnSwipeRefreshLayout() {
         binding.swipeLayout.setOnRefreshListener {
             updateMovies(1)
         }

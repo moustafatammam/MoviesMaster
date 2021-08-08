@@ -1,6 +1,8 @@
 package com.example.moviemaster.viewmodel
 
 import android.util.Log
+import androidx.databinding.Bindable
+import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import com.example.moviemaster.data.Repository
 import com.example.moviemaster.data.model.MovieResponse
@@ -12,7 +14,13 @@ class MovieListViewModel(private val repository: Repository) : BaseViewModel(){
     var searchedQuery: String? = null
     var genre: Int = 0
     var page: Int = 1
+
+    @get: Bindable
     var isLoading: Boolean = false
+        set(value) {
+            field = value
+            notifyPropertyChanged(BR.loading)
+        }
 
     private var moviesLiveData: MutableLiveData<MovieResponse> = MutableLiveData()
     private var searchedMoviesLiveData: MutableLiveData<MovieResponse> = MutableLiveData()

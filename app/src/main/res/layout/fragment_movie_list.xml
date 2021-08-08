@@ -6,6 +6,8 @@
 
     <data>
 
+        <import type="android.view.View" />
+
         <variable
             name="viewmodel"
             type="com.example.moviemaster.viewmodel.MovieListViewModel" />
@@ -20,11 +22,26 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/shimmer_view_container"
+                style="@style/Shimmer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="@{viewmodel.loading ? View.VISIBLE : View.GONE}">
+
+                <include
+                    layout="@layout/view_movie_shimmer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+
+            </com.facebook.shimmer.ShimmerFrameLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:visibility="@{viewmodel.loading ? View.GONE : View.VISIBLE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
