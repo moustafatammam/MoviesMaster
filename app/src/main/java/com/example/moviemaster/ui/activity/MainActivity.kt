@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.viewModels
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import com.example.moviemaster.R
@@ -13,20 +14,21 @@ import com.example.moviemaster.data.model.Genre
 import com.example.moviemaster.databinding.ActivityMainBinding
 import com.example.moviemaster.ui.adapter.GenreFilterAdapter
 import com.example.moviemaster.ui.fragment.MovieListFragment
-import com.example.moviemaster.util.Injector
 import com.example.moviemaster.viewmodel.MainViewModel
 import com.google.android.material.tabs.TabLayoutMediator
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: MainViewModel
+    private val viewModel: MainViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
-    private lateinit var genreAdapter: GenreFilterAdapter
+    @Inject lateinit var genreAdapter: GenreFilterAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        viewModel = Injector().getMainViewModel(this)
         setBinding()
         getGenres()
         addSearchClickListener()
@@ -48,7 +50,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setGenreAdapter() {
-        genreAdapter = GenreFilterAdapter(supportFragmentManager, lifecycle)
         binding.pager.adapter = genreAdapter
         genreAdapter.genres = viewModel.genres
     }

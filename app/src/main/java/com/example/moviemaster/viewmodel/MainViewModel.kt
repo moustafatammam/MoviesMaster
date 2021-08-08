@@ -7,11 +7,13 @@ import androidx.lifecycle.MutableLiveData
 import com.example.moviemaster.data.Repository
 import com.example.moviemaster.data.model.Genre
 import com.example.moviemaster.data.model.GenreResponse
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
 
-class MainViewModel(private val repository: Repository) : BaseViewModel() {
+@HiltViewModel
+class MainViewModel @Inject constructor(private val repository: Repository) : BaseViewModel() {
 
     private var genresLiveData: MutableLiveData<GenreResponse> = MutableLiveData()
 

@@ -6,10 +6,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.moviemaster.data.model.Movie
 import com.example.moviemaster.databinding.ViewMovieBinding
 import com.example.moviemaster.util.ItemClickListener
+import javax.inject.Inject
 
-class MoviesAdapter(private val itemClickListener: ItemClickListener): RecyclerView.Adapter<MoviesAdapter.MoviesViewHolder>() {
+class MoviesAdapter @Inject constructor(): RecyclerView.Adapter<MoviesAdapter.MoviesViewHolder>() {
 
     var movieList = ArrayList<Movie>()
+
+    lateinit var itemClickListener: ItemClickListener
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MoviesViewHolder {

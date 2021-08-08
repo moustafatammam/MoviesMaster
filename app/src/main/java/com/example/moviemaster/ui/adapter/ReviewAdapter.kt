@@ -6,8 +6,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.moviemaster.data.model.Cast
 import com.example.moviemaster.data.model.Review
 import com.example.moviemaster.databinding.ViewReviewBinding
+import javax.inject.Inject
 
-class ReviewAdapter: RecyclerView.Adapter<ReviewAdapter.ReviewViewHolder>() {
+class ReviewAdapter @Inject constructor(): RecyclerView.Adapter<ReviewAdapter.ReviewViewHolder>() {
 
     var reviewList = ArrayList<Review>()
 

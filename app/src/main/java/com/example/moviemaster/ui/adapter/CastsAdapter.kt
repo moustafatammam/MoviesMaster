@@ -5,9 +5,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.moviemaster.data.model.Cast
 import com.example.moviemaster.databinding.ViewCastBinding
+import javax.inject.Inject
 
 
-class CastsAdapter: RecyclerView.Adapter<CastsAdapter.CastViewHolder>() {
+class CastsAdapter @Inject constructor(): RecyclerView.Adapter<CastsAdapter.CastViewHolder>() {
 
     var castList = ArrayList<Cast>()
 
