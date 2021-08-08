@@ -85,6 +85,7 @@ class MovieListFragment() : Fragment(), ItemClickListener {
 
         initRecyclerView()
         updateMovies(1)
+        setOnSwipeRefreshLayout()
     }
 
     private fun initRecyclerView() {
@@ -124,6 +125,7 @@ class MovieListFragment() : Fragment(), ItemClickListener {
             })
             viewModel.getMovies(page, if (viewModel.genre == 0) "" else viewModel.genre.toString())
         }
+        binding.swipeLayout.isRefreshing = false
     }
 
     private fun updateAdapter(movieResponse: MovieResponse, page: Int) {
@@ -141,5 +143,11 @@ class MovieListFragment() : Fragment(), ItemClickListener {
 
     override fun onItemClicked(movie: Movie) {
         startActivity(MovieDetailsActivity.newInstance(this.context, movie))
+    }
+
+    private fun setOnSwipeRefreshLayout(){
+        binding.swipeLayout.setOnRefreshListener {
+            updateMovies(1)
+        }
     }
 }
