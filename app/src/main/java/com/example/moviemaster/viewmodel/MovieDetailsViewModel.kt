@@ -6,11 +6,16 @@ import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import com.example.moviemaster.data.Repository
 import com.example.moviemaster.data.model.*
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
 
-class MovieDetailsViewModel(val movie: Movie?, private val repository: Repository) :
+@HiltViewModel
+class MovieDetailsViewModel @Inject constructor(private val repository: Repository) :
     BaseViewModel() {
+
+    lateinit var movie: Movie
 
     @get: Bindable
     var castSize: Int = 0

@@ -3,8 +3,9 @@ package com.example.moviemaster.data
 import com.example.moviemaster.data.model.*
 import com.example.moviemaster.data.remote.MovieService
 import io.reactivex.Observable
+import javax.inject.Inject
 
-class Repository(private val movieService: MovieService){
+class Repository @Inject constructor(private val movieService: MovieService){
 
     fun getMovies(page: Int, genre: String): Observable<MovieResponse>{
         return movieService.getMovies(page, genre)

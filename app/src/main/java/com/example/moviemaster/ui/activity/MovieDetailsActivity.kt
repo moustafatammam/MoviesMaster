@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -18,22 +19,24 @@ import com.example.moviemaster.databinding.ActivityMovieDetailsBinding
 import com.example.moviemaster.ui.adapter.CastsAdapter
 import com.example.moviemaster.ui.adapter.MovieImagesAdapter
 import com.example.moviemaster.ui.adapter.ReviewAdapter
-import com.example.moviemaster.util.Injector
 import com.example.moviemaster.viewmodel.MovieDetailsViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MovieDetailsActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: MovieDetailsViewModel
+    private val viewModel: MovieDetailsViewModel by viewModels()
     private lateinit var binding: ActivityMovieDetailsBinding
-    private lateinit var imagesAdapter: MovieImagesAdapter
-    private lateinit var castsAdapter: CastsAdapter
-    private lateinit var reviewAdapter: ReviewAdapter
+    @Inject lateinit var imagesAdapter: MovieImagesAdapter
+    @Inject lateinit var castsAdapter: CastsAdapter
+    @Inject lateinit var reviewAdapter: ReviewAdapter
 
 
     companion object {
 
         fun newInstance(context: Context?, movie: Movie): Intent {
-            val intent: Intent = Intent(context, MovieDetailsActivity::class.java)
+            val intent = Intent(context, MovieDetailsActivity::class.java)
             intent.putExtra("extra_movie", movie)
             return intent
         }
@@ -64,8 +67,8 @@ class MovieDetailsActivity : AppCompatActivity() {
     }
 
     private fun setViewModel(movie: Movie?) {
-        viewModel = Injector().getMovieDetailsViewModel(this, movie)
         binding.viewmodel = viewModel
+        viewModel.movie = movie!!
     }
 
     private fun getImages() {
@@ -80,7 +83,6 @@ class MovieDetailsActivity : AppCompatActivity() {
     }
 
     private fun setImagesAdapter(images: List<Image>) {
-        imagesAdapter = MovieImagesAdapter(supportFragmentManager, lifecycle)
         binding.pager.adapter = imagesAdapter
         imagesAdapter.images = images as MutableList<Image>
     }
@@ -103,7 +105,6 @@ class MovieDetailsActivity : AppCompatActivity() {
     }
 
     private fun initCastRecyclerView() {
-        castsAdapter = CastsAdapter()
         binding.castRecycler.apply {
             layoutManager =
                 LinearLayoutManager(this@MovieDetailsActivity, RecyclerView.HORIZONTAL, false)
