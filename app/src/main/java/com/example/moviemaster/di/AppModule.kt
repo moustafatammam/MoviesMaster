@@ -1,7 +1,9 @@
 package com.example.moviemaster.di
 
-import com.example.moviemaster.data.Repository
+import com.example.moviemaster.data.repository.MovieDetailsRepository
 import com.example.moviemaster.data.remote.MovieService
+import com.example.moviemaster.data.repository.MainRepository
+import com.example.moviemaster.data.repository.MovieListRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,8 +14,15 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
+    @Singleton
+    @Provides
+    fun provideRepository(movieService: MovieService) = MovieDetailsRepository(movieService)
 
     @Singleton
     @Provides
-    fun provideRepository(movieService: MovieService) = Repository(movieService)
+    fun provideMovieListRepository(movieService: MovieService) = MovieListRepository(movieService)
+
+    @Singleton
+    @Provides
+    fun provideMainRepository(movieService: MovieService) = MainRepository(movieService)
 }

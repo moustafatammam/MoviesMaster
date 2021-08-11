@@ -3,10 +3,12 @@ package com.example.moviemaster.ui.activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.view.LayoutInflater
 import android.view.MenuItem
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.DataBindingUtil
+import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,22 +18,27 @@ import com.example.moviemaster.data.model.Image
 import com.example.moviemaster.data.model.Movie
 import com.example.moviemaster.data.model.Review
 import com.example.moviemaster.databinding.ActivityMovieDetailsBinding
-import com.example.moviemaster.ui.adapter.CastsAdapter
-import com.example.moviemaster.ui.adapter.MovieImagesAdapter
-import com.example.moviemaster.ui.adapter.ReviewAdapter
+import com.example.moviemaster.ui.adapter.BaseAdapter
 import com.example.moviemaster.viewmodel.MovieDetailsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MovieDetailsActivity : AppCompatActivity() {
+class MovieDetailsActivity : BaseActivity<ActivityMovieDetailsBinding>() {
 
-    private val viewModel: MovieDetailsViewModel by viewModels()
-    private lateinit var binding: ActivityMovieDetailsBinding
-    @Inject lateinit var imagesAdapter: MovieImagesAdapter
-    @Inject lateinit var castsAdapter: CastsAdapter
-    @Inject lateinit var reviewAdapter: ReviewAdapter
+    override val viewModel: MovieDetailsViewModel by viewModels()
 
+    @Inject lateinit var castsAdapter: BaseAdapter<Cast>
+    @Inject lateinit var reviewAdapter: BaseAdapter<Review>
+    @Inject lateinit var imageAdapter: BaseAdapter<Image>
+
+
+    override val bindingInflater: (LayoutInflater) -> ActivityMovieDetailsBinding = ActivityMovieDetailsBinding::inflate
+
+
+    override fun setLayoutResourceId(): Int {
+        return R.layout.activity_movie_details
+    }
 
     companion object {
 
@@ -45,12 +52,12 @@ class MovieDetailsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_movie_details)
         val movie: Movie? = intent.getParcelableExtra<Movie>("extra_movie")
+        viewModel.isLoading = true
 
-        setViewModel(movie)
         setToolbar()
-        getImages()
+        setAdapters()
+        setMovie(movie)
         iniRecyclerViews()
     }
 
@@ -62,60 +69,77 @@ class MovieDetailsActivity : AppCompatActivity() {
     }
 
     private fun setToolbar() {
-        setSupportActionBar(binding.toolbar)
+        setSupportActionBar((binding as ActivityMovieDetailsBinding).toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
-    private fun setViewModel(movie: Movie?) {
-        binding.viewmodel = viewModel
+    private fun setAdapters(){
+        castsAdapter.apply {
+            id = BR.cast
+            layoutId = R.layout.view_cast
+        }
+
+        reviewAdapter.apply {
+            id = BR.review
+            layoutId = R.layout.view_review
+        }
+
+        imageAdapter.apply {
+            id = BR.image
+            layoutId = R.layout.view_image
+        }
+    }
+
+    private fun setMovie(movie: Movie?) {
         viewModel.movie = movie!!
     }
 
-    private fun getImages() {
-        viewModel.apply {
-            isLoading = true
-            getImages()
-            getImagesLiveData().observe(this@MovieDetailsActivity, Observer {
-                setImagesAdapter(it.backdrops)
-                isLoading = false
-            })
-        }
-    }
-
-    private fun setImagesAdapter(images: List<Image>) {
-        binding.pager.adapter = imagesAdapter
-        imagesAdapter.images = images as MutableList<Image>
-    }
-
-    private fun initReviewRecyclerView() {
-        reviewAdapter = ReviewAdapter()
-        binding.reviewRecycler.apply {
+    private fun initImagesRecyclerView() {
+        (binding as ActivityMovieDetailsBinding).pager.apply {
             layoutManager =
-                LinearLayoutManager(this@MovieDetailsActivity)
-            adapter = reviewAdapter
+                LinearLayoutManager(this@MovieDetailsActivity, RecyclerView.HORIZONTAL, false)
+            adapter = imageAdapter
         }
-    }
-
-    private fun updateReviews() {
-        viewModel.getReviewLiveData().observe(this, Observer {
-            viewModel.reviewSize = it.reviews.size
-            reviewAdapter.addData(it.reviews as ArrayList<Review>)
-        })
-        viewModel.getReviews()
     }
 
     private fun initCastRecyclerView() {
-        binding.castRecycler.apply {
+        (binding as ActivityMovieDetailsBinding).castRecycler.apply {
             layoutManager =
                 LinearLayoutManager(this@MovieDetailsActivity, RecyclerView.HORIZONTAL, false)
             adapter = castsAdapter
         }
     }
 
+    private fun initReviewRecyclerView() {
+        (binding as ActivityMovieDetailsBinding).reviewRecycler.apply {
+            layoutManager =
+                LinearLayoutManager(this@MovieDetailsActivity)
+            adapter = reviewAdapter
+        }
+    }
+
+    private fun updateImages() {
+        viewModel.getImagesLiveData().observe(this, Observer {
+            imageAdapter.addData(it.backdrops as ArrayList<Image>)
+            viewModel.isLoading = false
+        })
+        viewModel.getImages()
+    }
+
+    private fun updateReviews() {
+        viewModel.getReviewLiveData().observe(this, Observer {
+            viewModel.reviewSize = it.reviews.size
+            reviewAdapter.addData(it.reviews as ArrayList<Review>)
+            viewModel.isLoading = false
+        })
+        viewModel.getReviews()
+    }
+
     private fun updateCast() {
         viewModel.getCastLiveData().observe(this, Observer {
             viewModel.castSize = it.cast.size
             castsAdapter.addData(it.cast as ArrayList<Cast>)
+            viewModel.isLoading = false
         })
         viewModel.getCast()
     }
@@ -123,7 +147,15 @@ class MovieDetailsActivity : AppCompatActivity() {
     private fun iniRecyclerViews() {
         initCastRecyclerView()
         initReviewRecyclerView()
-        updateCast()
-        updateReviews()
+        initImagesRecyclerView()
+        Handler(Looper.getMainLooper()).postDelayed(Runnable {
+            updateCast()
+            updateReviews()
+            updateImages()
+        }, 1000)
+
+
     }
+
+
 }

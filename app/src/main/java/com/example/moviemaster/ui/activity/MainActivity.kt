@@ -1,13 +1,12 @@
 package com.example.moviemaster.ui.activity
 
 import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.KeyEvent
+import android.view.LayoutInflater
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.viewModels
-import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import com.example.moviemaster.R
 import com.example.moviemaster.data.model.Genre
@@ -20,16 +19,20 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity<ActivityMainBinding>() {
 
-    private val viewModel: MainViewModel by viewModels()
-    private lateinit var binding: ActivityMainBinding
+    override val viewModel: MainViewModel by viewModels()
+    override val bindingInflater: (LayoutInflater) -> ActivityMainBinding = ActivityMainBinding::inflate
+
     @Inject lateinit var genreAdapter: GenreFilterAdapter
+
+    override fun setLayoutResourceId(): Int {
+        return R.layout.activity_main
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        setBinding()
+
         getGenres()
         addSearchClickListener()
     }
@@ -50,32 +53,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setGenreAdapter() {
-        binding.pager.adapter = genreAdapter
+        (binding as ActivityMainBinding).pager.adapter = genreAdapter
         genreAdapter.genres = viewModel.genres
     }
 
-    private fun setBinding() {
-        binding.viewmodel = viewModel
-        binding.executePendingBindings()
-    }
-
     private fun setTabs(genres: List<Genre>) {
-        val tabLayout = binding.tabLayout
-        TabLayoutMediator(tabLayout, binding.pager) { tab, position ->
+        val tabLayout = (binding as ActivityMainBinding).tabLayout
+        TabLayoutMediator(tabLayout, (binding as ActivityMainBinding).pager) { tab, position ->
             tab.text = genres[position].genre
         }.attach()
     }
 
     private fun addSearchClickListener() {
-        binding.searchIcon.setOnClickListener {
-            val searchedQuery = binding.searchBar.text.toString()
+        (binding as ActivityMainBinding).searchIcon.setOnClickListener {
+            val searchedQuery = (binding as ActivityMainBinding).searchBar.text.toString()
             if (searchedQuery.isNotEmpty()) {
                 openMoviesFragment(searchedQuery)
                 hideKeyboard()
             }
         }
 
-        binding.searchBar.setOnEditorActionListener { editText, i, keyEvent ->
+        (binding as ActivityMainBinding).searchBar.setOnEditorActionListener { editText, i, keyEvent ->
             if ((keyEvent != null && (keyEvent.keyCode == KeyEvent.KEYCODE_ENTER)) || (i == EditorInfo.IME_ACTION_DONE)) {
                 openMoviesFragment(editText.text.toString())
             }
@@ -92,6 +90,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun hideKeyboard(){
         val imm = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(binding.searchIcon.windowToken, 0)
+        imm.hideSoftInputFromWindow((binding as ActivityMainBinding).searchIcon.windowToken, 0)
     }
+
 }
