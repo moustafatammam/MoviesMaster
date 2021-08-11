@@ -1,9 +1,8 @@
 package com.example.moviemaster.util
 
-import com.example.moviemaster.data.model.Movie
 
-interface ItemClickListener {
+interface ItemClickListener<T> {
 
-    fun onItemClicked(movie: Movie)
+    fun onItemClicked(item: T)
 
 }

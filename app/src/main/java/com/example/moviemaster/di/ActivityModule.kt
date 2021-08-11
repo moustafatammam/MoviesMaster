@@ -2,7 +2,6 @@ package com.example.moviemaster.di
 
 import android.content.Context
 import com.example.moviemaster.ui.adapter.GenreFilterAdapter
-import com.example.moviemaster.ui.adapter.MovieImagesAdapter
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,11 +18,5 @@ class ActivityModule {
     @ActivityScoped
     fun provideGenreAdapterFragmentState(@ActivityContext context: Context): GenreFilterAdapter {
         return GenreFilterAdapter(context)
-    }
-
-    @Provides
-    @ActivityScoped
-    fun provideImageAdapterFragmentState(@ActivityContext context: Context): MovieImagesAdapter {
-        return MovieImagesAdapter(context)
     }
 }

@@ -30,8 +30,7 @@ data class Movie(
     val releaseDate: String?,
     @SerializedName("runtime")
     val runTime: String?,
-) : Parcelable {
-
+): Parcelable {
 
     companion object CREATOR : Parcelable.Creator<Movie> {
         override fun createFromParcel(parcel: Parcel): Movie {

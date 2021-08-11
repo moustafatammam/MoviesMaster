@@ -4,26 +4,19 @@ import android.util.Log
 import androidx.databinding.Bindable
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
-import com.example.moviemaster.data.Repository
 import com.example.moviemaster.data.model.MovieResponse
+import com.example.moviemaster.data.repository.MovieListRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 @HiltViewModel
-class MovieListViewModel @Inject constructor(private val repository: Repository) : BaseViewModel(){
+class MovieListViewModel @Inject constructor(private val movieListRepository: MovieListRepository) : BaseViewModel(){
 
     var searchedQuery: String? = null
     var genre: Int = 0
     var page: Int = 1
-
-    @get: Bindable
-    var isLoading: Boolean = false
-        set(value) {
-            field = value
-            notifyPropertyChanged(BR.loading)
-        }
 
     private var moviesLiveData: MutableLiveData<MovieResponse> = MutableLiveData()
     private var searchedMoviesLiveData: MutableLiveData<MovieResponse> = MutableLiveData()
@@ -37,7 +30,7 @@ class MovieListViewModel @Inject constructor(private val repository: Repository)
     }
 
     fun getMovies(page: Int, genre: String) {
-        val disposable =  repository.getMovies(page, genre)
+        val disposable =  movieListRepository.getMovies(page, genre)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe ({ v -> moviesLiveData.postValue(v)}, {e -> Log.e("MovieListFragment", e.localizedMessage)})
@@ -46,7 +39,7 @@ class MovieListViewModel @Inject constructor(private val repository: Repository)
     }
 
     fun getSearchedMovies(searchQuery: String, page: Int) {
-        val disposable =  repository.getSearchedMovies(searchQuery, page)
+        val disposable =  movieListRepository.getSearchedMovies(searchQuery, page)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe ({ v -> searchedMoviesLiveData.postValue(v)}, {e -> Log.e("MovieListFragment", e.localizedMessage)})

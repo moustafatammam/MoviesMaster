@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.databinding.Bindable
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
-import com.example.moviemaster.data.Repository
+import com.example.moviemaster.data.repository.MovieDetailsRepository
 import com.example.moviemaster.data.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -12,7 +12,7 @@ import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 @HiltViewModel
-class MovieDetailsViewModel @Inject constructor(private val repository: Repository) :
+class MovieDetailsViewModel @Inject constructor(private val movieDetailsRepository: MovieDetailsRepository) :
     BaseViewModel() {
 
     lateinit var movie: Movie
@@ -33,13 +33,6 @@ class MovieDetailsViewModel @Inject constructor(private val repository: Reposito
 
     lateinit var image: Image
 
-    @get: Bindable
-    var isLoading: Boolean = false
-        set(value) {
-            field = value
-            notifyPropertyChanged(BR.loading)
-        }
-
     private var imagesLiveData: MutableLiveData<ImageResponse> = MutableLiveData()
     private var castLiveData: MutableLiveData<CastResponse> = MutableLiveData()
     private var reviewLiveData: MutableLiveData<ReviewResponse> = MutableLiveData()
@@ -58,7 +51,7 @@ class MovieDetailsViewModel @Inject constructor(private val repository: Reposito
     }
 
     fun getImages() {
-        val disposable =  repository.getMovieImages(movie?.id)
+        val disposable =  movieDetailsRepository.getMovieImages(movie?.id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe ({ v -> imagesLiveData.postValue(v)}, {e -> Log.e("MovieDetailsActivity", e.localizedMessage)})
@@ -66,7 +59,7 @@ class MovieDetailsViewModel @Inject constructor(private val repository: Reposito
     }
 
     fun getCast() {
-        val disposable = repository.getMovieCast(movie?.id)
+        val disposable = movieDetailsRepository.getMovieCast(movie?.id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe ({ v -> castLiveData.postValue(v)}, {e -> Log.e("MovieDetailsActivity", e.localizedMessage)})
@@ -74,7 +67,7 @@ class MovieDetailsViewModel @Inject constructor(private val repository: Reposito
     }
 
     fun getReviews() {
-        val disposable = repository.getMovieReview(movie?.id)
+        val disposable = movieDetailsRepository.getMovieReview(movie?.id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe ({ v -> reviewLiveData.postValue(v)}, {e -> Log.e("MovieDetailsActivity", e.localizedMessage)})

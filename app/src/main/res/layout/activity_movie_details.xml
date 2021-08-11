@@ -43,25 +43,36 @@
             android:layout_height="match_parent"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="#FFFAFA">
 
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/backdrop_image"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
 
-                    <androidx.viewpager2.widget.ViewPager2
-                        android:id="@+id/pager"
+                <com.facebook.shimmer.ShimmerFrameLayout
+                    android:id="@+id/shimmer_view_container"
+                    style="@style/Shimmer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="@{viewmodel.loading ? View.VISIBLE : View.GONE}">
+
+                    <include
+                        layout="@layout/view_movie_details_shimmer"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent" />
-                </androidx.cardview.widget.CardView>
+
+
+                </com.facebook.shimmer.ShimmerFrameLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/pager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="@{viewmodel.loading ? View.GONE : View.VISIBLE}"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
 
                 <androidx.cardview.widget.CardView
@@ -70,8 +81,10 @@
                     android:layout_height="200dp"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
+                    android:visibility="@{viewmodel.loading ? View.GONE : View.VISIBLE}"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/backdrop_image">
+
+                    app:layout_constraintTop_toBottomOf="@+id/pager">
 
                     <ImageView
                         posterUrl="@{viewmodel.movie.posterPath}"
@@ -88,9 +101,11 @@
                     android:layout_marginTop="25dp"
                     android:layout_marginEnd="8dp"
                     android:fontFamily="sans-serif-condensed-medium"
+
                     android:text="@{viewmodel.movie.title}"
                     android:textColor="@color/black"
                     android:textSize="25sp"
+                    android:visibility="@{viewmodel.loading ? View.GONE : View.VISIBLE}"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/movie_poster"
                     app:layout_constraintTop_toTopOf="@id/movie_poster" />
@@ -102,9 +117,11 @@
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="8dp"
                     android:fontFamily="sans-serif-light"
+
                     android:text="@{viewmodel.movie.releaseDate}"
                     android:textColor="@color/black"
                     android:textSize="18sp"
+                    android:visibility="@{viewmodel.loading ? View.GONE : View.VISIBLE}"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@id/title"
                     app:layout_constraintTop_toBottomOf="@id/title" />
@@ -115,6 +132,8 @@
                     android:layout_height="1dp"
                     android:layout_marginTop="16dp"
                     android:background="?android:attr/listDivider"
+
+                    android:visibility="@{viewmodel.loading ? View.GONE : View.VISIBLE}"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/movie_poster" />
@@ -128,6 +147,8 @@
                     android:text="@string/movie_overview"
                     android:textColor="@color/black"
                     android:textSize="16sp"
+
+                    android:visibility="@{viewmodel.loading ? View.GONE : View.VISIBLE}"
                     app:layout_constraintStart_toStartOf="@id/movie_poster"
                     app:layout_constraintTop_toBottomOf="@+id/first_divider" />
 
@@ -139,11 +160,13 @@
                     android:layout_marginTop="16dp"
                     android:layout_marginEnd="16dp"
                     android:fontFamily="sans-serif-medium"
+
                     android:gravity="start"
                     android:text="@{viewmodel.movie.overView}"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
                     android:textColor="@color/black"
                     android:textSize="12sp"
+                    android:visibility="@{viewmodel.loading ? View.GONE : View.VISIBLE}"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="@+id/label_overview"
@@ -157,7 +180,7 @@
                     android:layout_height="1dp"
                     android:layout_marginTop="24dp"
                     android:background="?android:attr/listDivider"
-                    android:visibility="@{viewmodel.castSize > 0 ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{!viewmodel.loading &amp;&amp; viewmodel.castSize > 0 ? View.VISIBLE : View.GONE}"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -173,7 +196,7 @@
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
                     android:textColor="@color/black"
                     android:textSize="12sp"
-                    android:visibility="@{viewmodel.castSize > 0 ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{!viewmodel.loading &amp;&amp; viewmodel.castSize > 0 ? View.VISIBLE : View.GONE}"
                     app:layout_constraintStart_toStartOf="@id/label_overview"
                     app:layout_constraintTop_toBottomOf="@id/second_divider" />
 
@@ -185,7 +208,7 @@
                     android:layout_marginTop="16dp"
                     android:layout_marginEnd="16dp"
                     android:clipToPadding="false"
-                    android:visibility="@{viewmodel.castSize > 0 ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{!viewmodel.loading &amp;&amp; viewmodel.castSize > 0 ? View.VISIBLE : View.GONE}"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/label_cast" />
@@ -197,7 +220,7 @@
                     android:layout_height="1dp"
                     android:layout_marginTop="24dp"
                     android:background="?android:attr/listDivider"
-                    android:visibility="@{viewmodel.reviewSize > 0 ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{!viewmodel.loading &amp;&amp; viewmodel.reviewSize > 0 ? View.VISIBLE : View.GONE}"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -212,7 +235,7 @@
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
                     android:textColor="@color/black"
                     android:textSize="12sp"
-                    android:visibility="@{viewmodel.reviewSize > 0 ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{!viewmodel.loading &amp;&amp; viewmodel.reviewSize > 0 ? View.VISIBLE : View.GONE}"
                     app:layout_constraintStart_toStartOf="@id/label_overview"
                     app:layout_constraintTop_toBottomOf="@+id/third_divider" />
 
@@ -223,7 +246,7 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginEnd="16dp"
-                    android:visibility="@{viewmodel.reviewSize > 0 ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{!viewmodel.loading &amp;&amp; viewmodel.reviewSize > 0 ? View.VISIBLE : View.GONE}"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/label_reviews" />

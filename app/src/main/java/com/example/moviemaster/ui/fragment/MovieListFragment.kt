@@ -1,12 +1,13 @@
 package com.example.moviemaster.ui.fragment
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
-import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
+import androidx.databinding.library.baseAdapters.BR
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -16,7 +17,7 @@ import com.example.moviemaster.data.model.Movie
 import com.example.moviemaster.data.model.MovieResponse
 import com.example.moviemaster.databinding.FragmentMovieListBinding
 import com.example.moviemaster.ui.activity.MovieDetailsActivity
-import com.example.moviemaster.ui.adapter.MoviesAdapter
+import com.example.moviemaster.ui.adapter.BaseAdapter
 import com.example.moviemaster.util.ItemClickListener
 import com.example.moviemaster.util.PaginationScrollListener
 import com.example.moviemaster.viewmodel.MainViewModel
@@ -25,13 +26,13 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MovieListFragment() : Fragment(), ItemClickListener {
+class MovieListFragment() : BaseFragment<FragmentMovieListBinding>(), ItemClickListener<Movie> {
 
-    private val viewModel: MovieListViewModel by viewModels()
+    override val viewModel: MovieListViewModel by viewModels()
+    override val bindingInflater: (LayoutInflater, ViewGroup?, Boolean) -> FragmentMovieListBinding = FragmentMovieListBinding::inflate
+
     private val mainViewModel: MainViewModel by activityViewModels()
-    private lateinit var binding: FragmentMovieListBinding
-
-    @Inject lateinit var moviesAdapter: MoviesAdapter
+    @Inject lateinit var moviesAdapter: BaseAdapter<Movie>
 
     companion object {
         fun newInstance(query: String): MovieListFragment {
@@ -51,28 +52,20 @@ class MovieListFragment() : Fragment(), ItemClickListener {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-
-        binding = DataBindingUtil.inflate(
-            inflater, R.layout.fragment_movie_list, container, false
-        )
-
-        return binding.root
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.viewmodel = viewModel
-
         arguments?.let {
             viewModel.genre = it.getInt("genre")
             viewModel.searchedQuery = it.getString("searched_query")
         }
 
+        setAdapter()
+        addOnBackPressed()
+        initRecyclerView()
+        setOnSwipeRefreshLayout()
+    }
+
+    private fun addOnBackPressed(){
         if (mainViewModel.isSearchOpened) {
             activity?.onBackPressedDispatcher?.addCallback(
                 this.viewLifecycleOwner,
@@ -84,37 +77,44 @@ class MovieListFragment() : Fragment(), ItemClickListener {
                     }
                 })
         }
-
-        initRecyclerView()
-        updateMovies(1)
-        setOnSwipeRefreshLayout()
+    }
+    private fun setAdapter(){
+        moviesAdapter.apply {
+            id = BR.movie
+            layoutId = R.layout.view_movie
+            itemClickListener = this@MovieListFragment
+        }
     }
 
     private fun initRecyclerView() {
-        moviesAdapter.itemClickListener = this
-        binding.recycler.apply {
+        (binding as FragmentMovieListBinding).recycler.apply {
             layoutManager = GridLayoutManager(this@MovieListFragment.context, 2)
             addOnScrollListener(object :
                 PaginationScrollListener(layoutManager as GridLayoutManager) {
 
                 override fun isLoading(): Boolean {
-                    return viewModel.isLoading
+                    return viewModel.isProgressVisible
                 }
 
                 override fun loadMoreItems() {
-                    viewModel.isLoading = true
+                    viewModel.isProgressVisible = true
                     viewModel.page = viewModel.page + 1
-                    updateMovies(viewModel.page)
+                    Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                        updateMovies(viewModel.page)
+                    }, 1000)
+
                     post(Runnable { adapter?.notifyDataSetChanged() })
                 }
             })
             adapter = moviesAdapter
         }
+        updateMovies(1)
     }
 
 
     fun updateMovies(page: Int) {
         viewModel.isLoading = true
+        viewModel.isProgressVisible = true
 
         if (viewModel.searchedQuery != null) {
             viewModel.getSearchedMovieLiveData().observe(this.viewLifecycleOwner, Observer {
@@ -127,7 +127,7 @@ class MovieListFragment() : Fragment(), ItemClickListener {
             })
             viewModel.getMovies(page, if (viewModel.genre == 0) "" else viewModel.genre.toString())
         }
-        binding.swipeLayout.isRefreshing = false
+        (binding as FragmentMovieListBinding).swipeLayout.isRefreshing = false
     }
 
     private fun updateAdapter(movieResponse: MovieResponse, page: Int) {
@@ -140,16 +140,19 @@ class MovieListFragment() : Fragment(), ItemClickListener {
             }
         }
         viewModel.isLoading = false
+        viewModel.isProgressVisible = false
 
     }
 
-    override fun onItemClicked(movie: Movie) {
-        startActivity(MovieDetailsActivity.newInstance(this.context, movie))
+    override fun onItemClicked(item: Movie) {
+        startActivity(MovieDetailsActivity.newInstance(this.context, item))
     }
 
     private fun setOnSwipeRefreshLayout() {
-        binding.swipeLayout.setOnRefreshListener {
+        (binding as FragmentMovieListBinding).swipeLayout.setOnRefreshListener {
             updateMovies(1)
         }
     }
+
+
 }
