@@ -12,6 +12,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.moviemaster.R
 import com.example.moviemaster.data.model.Movie
 import com.example.moviemaster.data.model.MovieResponse
@@ -26,7 +27,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MovieListFragment() : BaseFragment<FragmentMovieListBinding>(), ItemClickListener<Movie> {
+class MovieListFragment() : BaseFragment<FragmentMovieListBinding>(), ItemClickListener {
 
     override val viewModel: MovieListViewModel by viewModels()
     override val bindingInflater: (LayoutInflater, ViewGroup?, Boolean) -> FragmentMovieListBinding = FragmentMovieListBinding::inflate
@@ -65,6 +66,16 @@ class MovieListFragment() : BaseFragment<FragmentMovieListBinding>(), ItemClickL
         setOnSwipeRefreshLayout()
     }
 
+    private fun setAdapter(){
+        moviesAdapter.apply {
+            id = BR.movie
+            layoutId = R.layout.view_movie
+            itemClickListener = this@MovieListFragment
+            recyclerView = (binding as FragmentMovieListBinding).recycler
+            setFooter(true)
+        }
+    }
+
     private fun addOnBackPressed(){
         if (mainViewModel.isSearchOpened) {
             activity?.onBackPressedDispatcher?.addCallback(
@@ -78,43 +89,46 @@ class MovieListFragment() : BaseFragment<FragmentMovieListBinding>(), ItemClickL
                 })
         }
     }
-    private fun setAdapter(){
-        moviesAdapter.apply {
-            id = BR.movie
-            layoutId = R.layout.view_movie
-            itemClickListener = this@MovieListFragment
-        }
-    }
 
     private fun initRecyclerView() {
         (binding as FragmentMovieListBinding).recycler.apply {
             layoutManager = GridLayoutManager(this@MovieListFragment.context, 2)
-            addOnScrollListener(object :
-                PaginationScrollListener(layoutManager as GridLayoutManager) {
-
-                override fun isLoading(): Boolean {
-                    return viewModel.isProgressVisible
-                }
-
-                override fun loadMoreItems() {
-                    viewModel.isProgressVisible = true
-                    viewModel.page = viewModel.page + 1
-                    Handler(Looper.getMainLooper()).postDelayed(Runnable {
-                        updateMovies(viewModel.page)
-                    }, 1000)
-
-                    post(Runnable { adapter?.notifyDataSetChanged() })
-                }
-            })
+            setSpanCount(moviesAdapter, layoutManager as GridLayoutManager)
+            setRecyclerOnScrollListener(this)
             adapter = moviesAdapter
         }
         updateMovies(1)
     }
 
+    private fun setSpanCount(adapter: BaseAdapter<Movie>, gridLayoutManager: GridLayoutManager){
+         gridLayoutManager.spanSizeLookup = object: GridLayoutManager.SpanSizeLookup() {
+             override fun getSpanSize(position: Int): Int {
+                 return if (adapter.getItemViewType(position) == adapter.TYPE_FOOTER_LOADER) gridLayoutManager.spanCount else 1
+             }
+         }
+    }
+
+    private fun setRecyclerOnScrollListener(recyclerView: RecyclerView){
+        recyclerView. addOnScrollListener(object : PaginationScrollListener(recyclerView.layoutManager as GridLayoutManager) {
+
+            override fun isLoading(): Boolean {
+                return viewModel.isFooterVisible
+            }
+
+            override fun loadMoreItems() {
+                viewModel.isFooterVisible = true
+                viewModel.page = viewModel.page + 1
+                Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                    updateMovies(viewModel.page)
+                }, 1000)
+            }
+        })
+
+    }
 
     fun updateMovies(page: Int) {
         viewModel.isLoading = true
-        viewModel.isProgressVisible = true
+        viewModel.isFooterVisible = true
 
         if (viewModel.searchedQuery != null) {
             viewModel.getSearchedMovieLiveData().observe(this.viewLifecycleOwner, Observer {
@@ -136,16 +150,15 @@ class MovieListFragment() : BaseFragment<FragmentMovieListBinding>(), ItemClickL
                 moviesAdapter.addData(movieResponse.results)
             } else {
                 moviesAdapter.updateData(movieResponse.results)
-                moviesAdapter.notifyDataSetChanged()
             }
         }
         viewModel.isLoading = false
-        viewModel.isProgressVisible = false
+        viewModel.isFooterVisible = false
 
     }
 
-    override fun onItemClicked(item: Movie) {
-        startActivity(MovieDetailsActivity.newInstance(this.context, item))
+    override fun onItemClicked(item: Any?) {
+        startActivity(MovieDetailsActivity.newInstance(this.context, item as Movie))
     }
 
     private fun setOnSwipeRefreshLayout() {

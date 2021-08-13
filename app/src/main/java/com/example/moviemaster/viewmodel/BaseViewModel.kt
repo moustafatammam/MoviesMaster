@@ -21,10 +21,10 @@ open class BaseViewModel: ViewModel(), Observable {
         }
 
     @get: Bindable
-    var isProgressVisible: Boolean = false
+    var isFooterVisible: Boolean = false
         set(value) {
             field = value
-            notifyPropertyChanged(BR.progressVisible)
+            notifyPropertyChanged(BR.footerVisible)
         }
 
     override fun addOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {

@@ -22,10 +22,8 @@ abstract class PaginationScrollListener(private var layoutManager: GridLayoutMan
 
         pastVisibleItems = firstVisibleItemPosition
 
-        val visibleThreshold = 5
-
         if (!isLoading()) {
-            if ((visibleItemCount + pastVisibleItems) >= totalItemCount - visibleThreshold) {
+           if(totalItemCount - visibleItemCount <= firstVisibleItemPosition){
                 loadMoreItems()
             }
         }

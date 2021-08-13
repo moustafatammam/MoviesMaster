@@ -1,8 +1,8 @@
 package com.example.moviemaster.util
 
 
-interface ItemClickListener<T> {
+interface ItemClickListener {
 
-    fun onItemClicked(item: T)
+    fun onItemClicked(item: Any?)
 
 }
