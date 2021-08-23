@@ -9,8 +9,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 import com.example.moviemaster.data.model.ReviewResponse
-
-
+import io.reactivex.Single
 
 
 interface MovieService {
@@ -19,7 +18,7 @@ interface MovieService {
     fun getMovies(
         @Query("page") page: Int,
         @Query("with_genres") genre: String
-    ): Observable<MovieResponse>
+    ): Single<MovieResponse>
 
     @GET("genre/movie/list")
     fun getGenres(): Observable<GenreResponse>
@@ -28,7 +27,7 @@ interface MovieService {
     fun getSearchedMovies(
         @Query("query") query: String,
         @Query("page") page: Int
-    ): Observable<MovieResponse>
+    ): Single<MovieResponse>
 
     @GET("movie/{movie_id}/images")
     fun getMovieImages(@Path("movie_id") id: Int?): Observable<ImageResponse>

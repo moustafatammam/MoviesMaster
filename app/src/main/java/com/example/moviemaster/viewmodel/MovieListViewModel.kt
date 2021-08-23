@@ -1,10 +1,9 @@
 package com.example.moviemaster.viewmodel
 
 import android.util.Log
-import androidx.databinding.Bindable
-import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
-import com.example.moviemaster.data.model.MovieResponse
+import androidx.paging.PagingData
+import com.example.moviemaster.data.model.Movie
 import com.example.moviemaster.data.repository.MovieListRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -16,34 +15,31 @@ class MovieListViewModel @Inject constructor(private val movieListRepository: Mo
 
     var searchedQuery: String? = null
     var genre: Int = 0
-    var page: Int = 1
 
-    private var moviesLiveData: MutableLiveData<MovieResponse> = MutableLiveData()
-    private var searchedMoviesLiveData: MutableLiveData<MovieResponse> = MutableLiveData()
+    private var moviesLiveData: MutableLiveData<PagingData<Movie>> = MutableLiveData()
+    private var searchedMoviesLiveData: MutableLiveData<PagingData<Movie>> = MutableLiveData()
 
-    fun getMovieLiveData(): MutableLiveData<MovieResponse> {
+    fun getMovieLiveData(): MutableLiveData<PagingData<Movie>> {
         return moviesLiveData
     }
 
-    fun getSearchedMovieLiveData(): MutableLiveData<MovieResponse> {
+    fun getSearchedMovieLiveData(): MutableLiveData<PagingData<Movie>> {
         return searchedMoviesLiveData
     }
 
-    fun getMovies(page: Int, genre: String) {
-        val disposable =  movieListRepository.getMovies(page, genre)
+    fun getMovies(genre: String) {
+        val disposable =  movieListRepository.getMovies(genre)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe ({ v -> moviesLiveData.postValue(v)}, {e -> Log.e("MovieListFragment", e.localizedMessage)})
         addDisposable(disposable)
-
     }
 
-    fun getSearchedMovies(searchQuery: String, page: Int) {
-        val disposable =  movieListRepository.getSearchedMovies(searchQuery, page)
+    fun getSearchedMovies(searchQuery: String) {
+        val disposable =  movieListRepository.getSearchedMovies(searchQuery)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe ({ v -> searchedMoviesLiveData.postValue(v)}, {e -> Log.e("MovieListFragment", e.localizedMessage)})
         addDisposable(disposable)
-
     }
 }
