@@ -1,8 +1,6 @@
 package com.example.moviemaster.ui.fragment
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,29 +9,31 @@ import androidx.databinding.library.baseAdapters.BR
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.moviemaster.R
 import com.example.moviemaster.data.model.Movie
-import com.example.moviemaster.data.model.MovieResponse
 import com.example.moviemaster.databinding.FragmentMovieListBinding
 import com.example.moviemaster.ui.activity.MovieDetailsActivity
-import com.example.moviemaster.ui.adapter.BaseAdapter
+import com.example.moviemaster.ui.adapter.BasePagedDataAdapter
+import com.example.moviemaster.ui.adapter.PagedStateAdapter
 import com.example.moviemaster.util.ItemClickListener
-import com.example.moviemaster.util.PaginationScrollListener
 import com.example.moviemaster.viewmodel.MainViewModel
 import com.example.moviemaster.viewmodel.MovieListViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MovieListFragment() : BaseFragment<FragmentMovieListBinding>(), ItemClickListener {
+class MovieListFragment : BaseFragment<FragmentMovieListBinding>(), ItemClickListener {
 
     override val viewModel: MovieListViewModel by viewModels()
     override val bindingInflater: (LayoutInflater, ViewGroup?, Boolean) -> FragmentMovieListBinding = FragmentMovieListBinding::inflate
 
     private val mainViewModel: MainViewModel by activityViewModels()
-    @Inject lateinit var moviesAdapter: BaseAdapter<Movie>
+    @Inject lateinit var moviesListAdapter: BasePagedDataAdapter<Movie>
+    @Inject lateinit var loadStateAdapter: PagedStateAdapter
+
 
     companion object {
         fun newInstance(query: String): MovieListFragment {
@@ -67,12 +67,10 @@ class MovieListFragment() : BaseFragment<FragmentMovieListBinding>(), ItemClickL
     }
 
     private fun setAdapter(){
-        moviesAdapter.apply {
+        moviesListAdapter.apply {
             id = BR.movie
             layoutId = R.layout.view_movie
             itemClickListener = this@MovieListFragment
-            recyclerView = (binding as FragmentMovieListBinding).recycler
-            setFooter(true)
         }
     }
 
@@ -93,68 +91,43 @@ class MovieListFragment() : BaseFragment<FragmentMovieListBinding>(), ItemClickL
     private fun initRecyclerView() {
         (binding as FragmentMovieListBinding).recycler.apply {
             layoutManager = GridLayoutManager(this@MovieListFragment.context, 2)
-            setSpanCount(moviesAdapter, layoutManager as GridLayoutManager)
-            setRecyclerOnScrollListener(this)
-            adapter = moviesAdapter
+            setSpanCount(moviesListAdapter, layoutManager as GridLayoutManager)
+            adapter = moviesListAdapter.withLoadStateFooter(PagedStateAdapter())
         }
-        updateMovies(1)
+        updateMovies()
     }
 
-    private fun setSpanCount(adapter: BaseAdapter<Movie>, gridLayoutManager: GridLayoutManager){
+    private fun setSpanCount(adapter: BasePagedDataAdapter<Movie>, gridLayoutManager: GridLayoutManager){
          gridLayoutManager.spanSizeLookup = object: GridLayoutManager.SpanSizeLookup() {
              override fun getSpanSize(position: Int): Int {
-                 return if (adapter.getItemViewType(position) == adapter.TYPE_FOOTER_LOADER) gridLayoutManager.spanCount else 1
+                 return if (adapter.getItemViewType(position) == adapter.TYPE_FOOTER_LOADER) 1 else 2
              }
          }
     }
 
-    private fun setRecyclerOnScrollListener(recyclerView: RecyclerView){
-        recyclerView. addOnScrollListener(object : PaginationScrollListener(recyclerView.layoutManager as GridLayoutManager) {
-
-            override fun isLoading(): Boolean {
-                return viewModel.isFooterVisible
-            }
-
-            override fun loadMoreItems() {
-                viewModel.isFooterVisible = true
-                viewModel.page = viewModel.page + 1
-                Handler(Looper.getMainLooper()).postDelayed(Runnable {
-                    updateMovies(viewModel.page)
-                }, 1000)
-            }
-        })
-
-    }
-
-    fun updateMovies(page: Int) {
+    private fun updateMovies() {
         viewModel.isLoading = true
-        viewModel.isFooterVisible = true
 
         if (viewModel.searchedQuery != null) {
             viewModel.getSearchedMovieLiveData().observe(this.viewLifecycleOwner, Observer {
-                updateAdapter(it, page)
+                viewLifecycleOwner.lifecycleScope.launch {
+                    moviesListAdapter.submitData(it)
+                    (binding as FragmentMovieListBinding).swipeLayout.isRefreshing = false
+                }
+                viewModel.isLoading = false
             })
-            viewModel.getSearchedMovies(viewModel.searchedQuery!!, page)
+            viewModel.getSearchedMovies(viewModel.searchedQuery!!)
         } else {
             viewModel.getMovieLiveData().observe(this.viewLifecycleOwner, Observer {
-                updateAdapter(it, page)
+                viewLifecycleOwner.lifecycleScope.launch {
+                    moviesListAdapter.submitData(it)
+                    (binding as FragmentMovieListBinding).swipeLayout.isRefreshing = false
+                }
+
+                viewModel.isLoading = false
             })
-            viewModel.getMovies(page, if (viewModel.genre == 0) "" else viewModel.genre.toString())
+            viewModel.getMovies(if (viewModel.genre == 0) "" else viewModel.genre.toString())
         }
-        (binding as FragmentMovieListBinding).swipeLayout.isRefreshing = false
-    }
-
-    private fun updateAdapter(movieResponse: MovieResponse, page: Int) {
-        if (movieResponse.totalPages >= movieResponse.page && movieResponse.page == page) {
-            if (page > 1) {
-                moviesAdapter.addData(movieResponse.results)
-            } else {
-                moviesAdapter.updateData(movieResponse.results)
-            }
-        }
-        viewModel.isLoading = false
-        viewModel.isFooterVisible = false
-
     }
 
     override fun onItemClicked(item: Any?) {
@@ -162,10 +135,11 @@ class MovieListFragment() : BaseFragment<FragmentMovieListBinding>(), ItemClickL
     }
 
     private fun setOnSwipeRefreshLayout() {
-        (binding as FragmentMovieListBinding).swipeLayout.setOnRefreshListener {
-            updateMovies(1)
+        (binding as FragmentMovieListBinding).swipeLayout.apply {
+            setOnRefreshListener {
+                moviesListAdapter.refresh()
+            }
         }
     }
-
 
 }

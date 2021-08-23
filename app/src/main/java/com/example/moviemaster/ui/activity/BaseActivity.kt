@@ -1,6 +1,5 @@
 package com.example.moviemaster.ui.activity
 
-import android.content.res.Resources.NotFoundException
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
