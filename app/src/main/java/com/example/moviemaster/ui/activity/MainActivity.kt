@@ -54,6 +54,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     private fun setGenreAdapter() {
         (binding as ActivityMainBinding).pager.adapter = genreAdapter
+        (binding as ActivityMainBinding).pager.offscreenPageLimit = 3
         genreAdapter.genres = viewModel.genres
     }
 
